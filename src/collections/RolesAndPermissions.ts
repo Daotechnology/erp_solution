@@ -1,6 +1,6 @@
 import { CollectionConfig } from 'payload/types';
-import { isAdmin } from '../access/isAdmin';
-import { isAdminOrSelf } from '../access/isAdminOrSelf';
+import { canAccess, isAdmin } from '../access';
+import { isPermission } from '../helper';
 
 const RolesAndPermission: CollectionConfig = {
   slug: 'roles_permissions',
@@ -9,15 +9,42 @@ const RolesAndPermission: CollectionConfig = {
   },
 
   access: {
-    create: isAdminOrSelf,
-    read: isAdminOrSelf,
-    update: isAdminOrSelf,
-    delete: isAdminOrSelf,
+    create: isAdmin('create'),
+    read: canAccess('read'),
+    update: canAccess('update'),
+    delete: canAccess('delete'),
   },
 
   fields: [
-    { name: 'permission_id', type: 'relationship', hasMany: true, relationTo: 'permissions' },
-    { name: 'role_id', type: 'relationship', relationTo: 'roles' },
+    { 
+      name: 'permission_id',
+      type: 'relationship', 
+      validate: async (val, { operation }) => {
+        if (operation === 'create') {
+            const isPermissionValid = await isPermission(val);
+            if (!isPermissionValid) {
+                throw new Error("sorry one or many permission ids are incorrect");
+            }
+        }
+        return val;
+    },    
+      hasMany: true,
+      relationTo: 'permissions'
+    },
+    { 
+      name: 'role_id', 
+      type: 'relationship',
+      //  validate: async (val, { operation }) => {
+      //     if (operation === 'create') {
+      //         const isPermissionValid = await isPermission(val);
+      //         if (!isPermissionValid) {
+      //             throw new Error("sorry one or many permission ids are incorrect");
+      //         }
+      //     }
+      //     return val;
+      // },  
+      relationTo: 'roles' 
+    },
   ],
 };
 

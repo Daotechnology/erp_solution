@@ -1,6 +1,5 @@
 import type { CollectionAfterChangeHook, CollectionBeforeOperationHook, CollectionConfig } from 'payload/types'
-import { isAdmin } from '../access/isAdmin';
-import { getOptions } from '../helper/option';
+import { canAccess, isAdmin } from '../access';
 import payload from 'payload';
 
 const Roles: CollectionConfig = {
@@ -12,11 +11,10 @@ const Roles: CollectionConfig = {
   },
 
   access: {
-    // create: isAdmin,
-    read: () => true,
-    create: () => true,
-    update: isAdmin,
-    delete: isAdmin,
+    read: canAccess('read'), // () => true,
+    create: isAdmin('create'),
+    update: canAccess('update'),
+    delete: canAccess('delete'),
   },
 
   fields: [

@@ -7,7 +7,6 @@ import UserRoles from './collections/UserRoles';
 import Roles from './collections/Roles';
 import RolesAndPermission from './collections/RolesAndPermissions';
 import Permissions from './collections/Permissions';
-import RoleOptions from './collections/RolesOptions';
 
 export default buildConfig({
   admin: {
@@ -20,7 +19,6 @@ export default buildConfig({
     Roles,
     RolesAndPermission,
     Permissions,
-    RoleOptions
   ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),

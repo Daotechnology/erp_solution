@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload/types';
-import { isAdmin } from '../access/isAdmin';
+import { isAdmin, canAccess } from '../access/';
 
 const UserRoles: CollectionConfig = {
     slug: 'user_roles',
@@ -7,10 +7,10 @@ const UserRoles: CollectionConfig = {
         // useAsTitle: 'id',
     },
     access: {
-        create: isAdmin,
-        read: isAdmin,
-        update: isAdmin,
-        delete: isAdmin,
+        create: isAdmin('create'),
+        read: canAccess('read'),
+        update: canAccess('update'),
+        delete: canAccess('delete'),
     },
     fields: [
         {

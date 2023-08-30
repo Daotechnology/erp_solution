@@ -1,64 +1,63 @@
 import { CollectionConfig, CollectionAfterChangeHook } from 'payload/types';
-import { isAdminOrSelf } from '../access/isAdminOrSelf';
-import { isAdmin, isAdminFieldLevel } from '../access/isAdmin';
+import { isAdmin, canAccess } from '../access';
 import payload from 'payload';
 import Roles from './Roles';
-
-// import bcrypt from 'bcrypt';
-
-// async function hashPassword(plainTextPassword: string): Promise<string> {
-//   const saltRounds = 10;
-//   const hashedPassword = await bcrypt.hash(plainTextPassword, saltRounds);
-//   return hashedPassword;
-// }
-
-// async function comparePasswords(
-//   userProvidedPassword: string,
-//   hashedPassword: string
-// ): Promise<boolean> {
-//   const passwordsMatch = await bcrypt.compare(userProvidedPassword, hashedPassword);
-//   return passwordsMatch;
-// }
+import { getRolesByUserId } from '../helper';
 
 const Users: CollectionConfig = {
   slug: 'users',
+
   auth: {
     depth: 0,
   },
-  // admin: {
-  //   useAsTitle: 'email',
-  // },
-  access: {
-    // Only admins can create users
-    create: () => true,
-    read: () => true,
-    update: () => true,
-    delete: () => true
-    // create: isAdmin,
-    // Admins can read all, but any other logged in user can only read themselves
-    // read: isAdminOrSelf,
-    // Admins can update all, but any other logged in user can only update themselves
-    // update: isAdminOrSelf,
-    // Only admins can delete
-    // delete: isAdmin,
+
+  admin: {
+    useAsTitle: 'email',
   },
+
+  access: {
+    // create:()=>true,
+    create: isAdmin('create'), // Admins can read all, but any other logged in user can only read themselves
+    read: canAccess('read'), // Admins can read all, but any other logged in user can only read themselves
+    update: canAccess('update'), // Admins can update all, but any other logged in user can only update themselves
+    delete: canAccess('delete'), // Only admins can delete
+  },
+
+  endpoints: [
+    {
+      path: "/roles",
+      method: "get",
+      handler: async (req, res, next) => {
+        try {
+          const user = req.user;
+
+          if (!user) {
+            return res.status(404).json({ error: "User not found" });
+          }
+
+          const roles = (await getRolesByUserId(user.id)).flat();
+
+          return res.status(200).send(roles);
+        } catch (error) {
+          // Handle errors here
+          console.error("An error occurred:", error);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+      }
+      ,
+    },
+  ],
+
   fields: [
     { name: 'email', type: 'email', required: true, unique: true },
-    { name: 'company', type: 'text', required: true },
+    { name: 'company', type: 'text', required: true, saveToJWT:true },
     {
       name: 'password',
       type: 'text',
-      // validate: async (val, { operation }) => {
-      //   console.log(val);
-      //   if (operation == 'create' || operation == 'update') {
-      //     const hash_password = await hashPassword(val);
-      //     return hash_password;
-      //   }
-      //   return val;
-      // },
       required: true
     }
   ],
+
   hooks: {
     beforeOperation: [async ({ args, operation }) => {
       if (operation == 'create') {
@@ -71,7 +70,7 @@ const Users: CollectionConfig = {
           collection: 'roles',
         });
 
-        const storedRoles = roleDB.docs.map((role) => role.roleAlias); // Extract stored role aliases
+        const storedRoles = roleDB.docs.map((role) => role.id); // Extract stored role aliases
 
         const rolePermission = isRoleArray.every((role: any) => storedRoles.includes(role)); // Check if all role matches
 
@@ -88,16 +87,7 @@ const Users: CollectionConfig = {
 
       if (operation == 'create' || operation == 'update') {
         const user_id = doc.id;
-        const roles = Array.isArray(req?.body?.roles) ? req?.body?.roles : [req?.body?.roles]; // Ensure roles is an array
-
-        const roleDB = await payload.find({
-          collection: 'roles',
-        });
-
-        // Find roles that exist in the database and get their corresponding IDs
-        const rolesWithIDs = roleDB?.docs?.filter((role) => roles.includes(role.roleAlias));
-
-        const rolesId = rolesWithIDs?.map((role) => role.id);
+        const rolesId = Array.isArray(req?.body?.roles) ? req?.body?.roles : [req?.body?.roles]; // Ensure roles is an array
 
         //transform role to the acceptable database format
         const transformedRole = rolesId?.map((role_id) => ({
@@ -111,9 +101,11 @@ const Users: CollectionConfig = {
             roles: transformedRole
           },
         })
-        return;
+        return assignRolesToUser;
       }
-      return 
+
+      return;
+
     }],
   }
 };

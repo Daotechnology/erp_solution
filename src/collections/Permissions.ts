@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
+import { canAccess, isAdmin } from '../access';
+
 
 const Permission: CollectionConfig = {
     slug: 'permissions',
@@ -10,24 +12,17 @@ const Permission: CollectionConfig = {
     },
 
     access: {
-        // create: isAdmin,
-        // // Only admins or editors with site access can read
-        // read: isAdminOrHasSiteAccess('id'),
-        // // Only admins can update
-        // update: isAdmin,
-        // // Only admins can delete
-        // delete: isAdmin,
-        read: () => true,
-        create: () => true,
-        update: () => true,
-        delete: () => true,
+        read: canAccess('read'), // () => true,
+        create: isAdmin('create'),
+        update: canAccess('update'),
+        delete: canAccess('delete'),
     },
 
     fields: [
-        { name: 'name', type: 'text', required: true },
-        { name: 'action', type: 'text', required: true },
-        { name: 'description', type: 'text', required: true},
-        { name: 'resource', type: 'text', required: true },
+        { name: 'name', type: 'text', required: true, unique: true },
+        { name: 'action', type: 'text', required: true, unique: true },
+        { name: 'description', type: 'text', required: true, unique: true },
+        { name: 'resource', type: 'text', required: true, unique: true },
     ],
 
 }
