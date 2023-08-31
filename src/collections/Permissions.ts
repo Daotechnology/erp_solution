@@ -12,10 +12,10 @@ const Permission: CollectionConfig = {
     },
 
     access: {
-        read: canAccess('read'), // () => true,
-        create: isAdmin('create'),
-        update: canAccess('update'),
-        delete: canAccess('delete'),
+        read: () => true, // canAccess('read'), // () => true,
+        create: () => true, // isAdmin('create'),
+        update: () => true, // canAccess('update'),
+        delete: () => true, // canAccess('delete'),
     },
 
     fields: [

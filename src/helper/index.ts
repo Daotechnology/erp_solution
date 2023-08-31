@@ -1,12 +1,6 @@
 
 import payload from "payload";
 
-interface Permission {
-    action: string;
-    resource: string;
-    // ... other properties
-}
-
 export const checkPermission = async (roles: string[], requiredResource: string, action: string): Promise<boolean> => {
     try {
         const rolePermissions = await Promise.all(roles.map(async (role_id) => {
@@ -48,7 +42,10 @@ export const extractRoleIds = async (userId: string): Promise<string[]> => {
         }
     });
 
+    console.log(rolesDB);
+
     const rolesArray = rolesDB.docs.map(doc => doc.roles);
+
     const roleIds = rolesArray.map(roles => roles[0].role_id).filter(roleId => roleId !== undefined);
 
     return roleIds;
@@ -107,24 +104,217 @@ export const isPermission = async (permissions: string[]): Promise<boolean> => {
     return findPermissionResults.some(result => result);
 };
 
-
-
-export async function generateTicketNumber(data:any): Promise<string> {
+//Ticket
+export async function generateTicketNumber(data: any): Promise<string> {
 
     const { ticket_type } = data;
-      
-    const tickets = await payload.find({
-      collection: 'tickets',
-    });
-    
-    const ticketCount = tickets.totalDocs || 0; 
-    
-    const formattedTicketCount = String(ticketCount + 1).padStart(3, '0');
-    
-    const ticketNumber = `${ticket_type}${formattedTicketCount}`; // Generate ticket number
-    
-    return ticketNumber;
-  }
 
+    const tickets = await payload.find({
+        collection: 'tickets',
+    });
+
+    const ticketCount = tickets.totalDocs || 0;
+
+    const formattedTicketCount = String(ticketCount + 1).padStart(3, '0');
+
+    const ticketNumber = `${ticket_type}${formattedTicketCount}`; // Generate ticket number
+
+    return ticketNumber;
+}
+
+export async function getTicketCreatedByMe(user: string, ticket_type: string): Promise<any> {
+
+    const tickets = await payload.find({
+        collection: 'tickets',
+        where: {
+            and: [
+                {
+                    assign_by: {
+                        equals: user
+                    }
+                }, {
+                    and: [
+                        {
+                            ticket_type: {
+                                equals: ticket_type
+                            }
+                        }
+                    ]
+                }
+            ],
+
+        }
+    });
+
+    return tickets;
+}
+
+export async function getTicketAssignedToMe(user: string, ticket_type: string): Promise<any> {
+
+    const tickets = await payload.find({
+        collection: 'tickets',
+        where: {
+            and: [
+                {
+                    assign_to: {
+                        equals: user
+                    }
+                }, {
+                    and: [
+                        {
+                            ticket_type: {
+                                equals: ticket_type
+                            }
+                        }
+                    ]
+                }
+            ],
+
+        }
+    });
+
+    return tickets;
+}
+
+export async function verifyTicket(id: string): Promise<any> {
+    const ticket = await payload.find({
+        collection: "tickets",
+        where: {
+            id: {
+                equals: id
+            }
+        }
+    });
+    return ticket.totalDocs > 0;
+}
+
+export async function getTaskCreatedByMe(user: string): Promise<any> {
+
+    const tasks = await payload.find({
+        collection: 'tasks',
+        where: {
+            and: [
+                {
+                    assign_by: {
+                        equals: user
+                    }
+                }, {
+                    and: [
+                        {
+                            status: {
+                                equals: 'creation'
+                            }
+                        }
+                    ]
+                }
+            ],
+        }
+    });
+
+    return tasks;
+}
+
+export async function getTaskAssignedToMe(user: string): Promise<any> {
+
+    const tasks = await payload.find({
+        collection: 'tasks',
+        where: {
+            and: [
+                {
+                    assign_to: {
+                        equals: user
+                    }
+                }, {
+                    and: [
+                        {
+                            status: {
+                                equals: 'creation'
+                            }
+                        }
+                    ]
+                }
+            ],
+        }
+    });
+
+    return tasks;
+}
+
+export async function verifyTask(id: string): Promise<any> {
+    const ticket = await payload.find({
+        collection: "tasks",
+        where: {
+            id: {
+                equals: id
+            }
+        }
+    });
+    return ticket.totalDocs > 0;
+}
+
+export async function getReportByTaskId(user: string, task_id: string): Promise<any> {
+
+    const tasks = await payload.find({
+        collection: 'reports',
+        where: {
+            and: [
+                {
+                    assign_by: {
+                        equals: user
+                    }
+                }, {
+                    and: [
+                        {
+                            task_id: {
+                                equals: task_id
+                            }
+                        }
+                    ]
+                }
+            ],
+        }
+    });
+
+    return tasks;
+}
+
+export async function completeTaskById(task_id: string): Promise<any> {
+
+    const tasks = await payload.update({
+        collection: 'tasks',
+        id: task_id,
+        data: {
+            status: "completed"
+        }
+    });
+
+    return tasks;
+}
+
+export async function fetchAllCompletedTask(user:string): Promise<any> {
+
+    const tasks = await payload.find({
+        collection: 'tasks',
+        where: {
+            and: [
+                {
+                    assign_by: {
+                        equals: user
+                    }
+                }, {
+                    and: [
+                        {
+                            status: {
+                                equals: 'completed'
+                            }
+                        }
+                    ]
+                }
+            ],
+        }
+    });
+
+    return tasks;
+}
 
 

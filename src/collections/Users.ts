@@ -16,11 +16,10 @@ const Users: CollectionConfig = {
   },
 
   access: {
-    // create:()=>true,
-    create: isAdmin('create'), // Admins can read all, but any other logged in user can only read themselves
-    read: canAccess('read'), // Admins can read all, but any other logged in user can only read themselves
-    update: canAccess('update'), // Admins can update all, but any other logged in user can only update themselves
-    delete: canAccess('delete'), // Only admins can delete
+    read: () => true, // canAccess('read'), // () => true,
+    create: () => true, // isAdmin('create'),
+    update: () => true, // canAccess('update'),
+    delete: () => true, // canAccess('delete'),
   },
 
   endpoints: [
@@ -30,7 +29,6 @@ const Users: CollectionConfig = {
       handler: async (req, res, next) => {
         try {
           const user = req.user;
-
           if (!user) {
             return res.status(404).json({ error: "User not found" });
           }
@@ -50,7 +48,7 @@ const Users: CollectionConfig = {
 
   fields: [
     { name: 'email', type: 'email', required: true, unique: true },
-    { name: 'company', type: 'text', required: true, saveToJWT:true },
+    { name: 'company', type: 'text', required: true, saveToJWT: true },
     {
       name: 'password',
       type: 'text',

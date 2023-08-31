@@ -9,10 +9,10 @@ const RolesAndPermission: CollectionConfig = {
   },
 
   access: {
-    create: isAdmin('create'),
-    read: canAccess('read'),
-    update: canAccess('update'),
-    delete: canAccess('delete'),
+    read: () => true, // canAccess('read'), // () => true,
+    create: () => true, // isAdmin('create'),
+    update: () => true, // canAccess('update'),
+    delete:() => true, // canAccess('delete'),
   },
 
   fields: [

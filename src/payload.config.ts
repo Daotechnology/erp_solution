@@ -7,6 +7,8 @@ import UserRoles from './collections/UserRoles';
 import Roles from './collections/Roles';
 import RolesAndPermission from './collections/RolesAndPermissions';
 import Permissions from './collections/Permissions';
+import Tasks from './collections/Tasks';
+import Reports from './collections/Reports';
 
 export default buildConfig({
   admin: {
@@ -19,6 +21,8 @@ export default buildConfig({
     Roles,
     RolesAndPermission,
     Permissions,
+    Tasks,
+    Reports
   ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
@@ -31,9 +35,9 @@ export default buildConfig({
     // payloadCloud()
   ],
   cors: [
-    'localhost:3000'
+    'http://localhost:3000'
   ],
   csrf: [
-    'localhost:3000'
+    'http://localhost:3000'
   ],
 });
