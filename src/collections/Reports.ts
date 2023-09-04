@@ -1,7 +1,5 @@
-import type { CollectionAfterChangeHook, CollectionBeforeOperationHook, CollectionConfig } from 'payload/types'
-import { canAccess, isAdmin } from '../access';
-import payload from 'payload';
-import { getReportByTaskId, getTaskAssignedToMe, getTaskCreatedByMe, verifyTask, verifyTicket } from '../helper';
+import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
+import { getReportByTaskId, verifyTask } from '../helper';
 import { updateDocumentInCollection } from '../helper/model.helper';
 
 const AfterChangeHook: CollectionAfterChangeHook = async ({

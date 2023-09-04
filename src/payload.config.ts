@@ -9,6 +9,8 @@ import RolesAndPermission from './collections/RolesAndPermissions';
 import Permissions from './collections/Permissions';
 import Tasks from './collections/Tasks';
 import Reports from './collections/Reports';
+import Projects from './collections/Projects';
+import Requests from './collections/Requests';
 
 export default buildConfig({
   admin: {
@@ -22,7 +24,9 @@ export default buildConfig({
     RolesAndPermission,
     Permissions,
     Tasks,
-    Reports
+    Reports,
+    Projects,
+    Requests
   ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),

@@ -122,54 +122,28 @@ export async function generateTicketNumber(data: any): Promise<string> {
     return ticketNumber;
 }
 
-export async function getTicketCreatedByMe(user: string, ticket_type: string): Promise<any> {
+export async function getTicketCreatedByMe(user: string): Promise<any> {
 
     const tickets = await payload.find({
         collection: 'tickets',
         where: {
-            and: [
-                {
-                    assign_by: {
-                        equals: user
-                    }
-                }, {
-                    and: [
-                        {
-                            ticket_type: {
-                                equals: ticket_type
-                            }
-                        }
-                    ]
-                }
-            ],
-
+            assign_by: {
+                equals: user
+            }
         }
     });
 
     return tickets;
 }
 
-export async function getTicketAssignedToMe(user: string, ticket_type: string): Promise<any> {
+export async function getTicketAssignedToMe(user: string): Promise<any> {
 
     const tickets = await payload.find({
         collection: 'tickets',
         where: {
-            and: [
-                {
-                    assign_to: {
-                        equals: user
-                    }
-                }, {
-                    and: [
-                        {
-                            ticket_type: {
-                                equals: ticket_type
-                            }
-                        }
-                    ]
-                }
-            ],
-
+            assign_to: {
+                equals: user
+            }
         }
     });
 
@@ -188,57 +162,6 @@ export async function verifyTicket(id: string): Promise<any> {
     return ticket.totalDocs > 0;
 }
 
-export async function getTaskCreatedByMe(user: string): Promise<any> {
-
-    const tasks = await payload.find({
-        collection: 'tasks',
-        where: {
-            and: [
-                {
-                    assign_by: {
-                        equals: user
-                    }
-                }, {
-                    and: [
-                        {
-                            status: {
-                                equals: 'creation'
-                            }
-                        }
-                    ]
-                }
-            ],
-        }
-    });
-
-    return tasks;
-}
-
-export async function getTaskAssignedToMe(user: string): Promise<any> {
-
-    const tasks = await payload.find({
-        collection: 'tasks',
-        where: {
-            and: [
-                {
-                    assign_to: {
-                        equals: user
-                    }
-                }, {
-                    and: [
-                        {
-                            status: {
-                                equals: 'creation'
-                            }
-                        }
-                    ]
-                }
-            ],
-        }
-    });
-
-    return tasks;
-}
 
 export async function verifyTask(id: string): Promise<any> {
     const ticket = await payload.find({
@@ -278,23 +201,25 @@ export async function getReportByTaskId(user: string, task_id: string): Promise<
     return tasks;
 }
 
-export async function completeTaskById(task_id: string): Promise<any> {
 
-    const tasks = await payload.update({
-        collection: 'tasks',
-        id: task_id,
-        data: {
-            status: "completed"
+export async function getAllProjectCreatedByMe(user: string): Promise<any> {
+
+    const project = await payload.find({
+        collection: 'projects',
+        where: {
+            assign_by: {
+                equals: user
+            }
         }
     });
 
-    return tasks;
+    return project;
 }
 
-export async function fetchAllCompletedTask(user:string): Promise<any> {
+export async function fetchAllRequestByRequestType(user: string, request_type: string): Promise<any> {
 
     const tasks = await payload.find({
-        collection: 'tasks',
+        collection: 'requests',
         where: {
             and: [
                 {
@@ -304,8 +229,8 @@ export async function fetchAllCompletedTask(user:string): Promise<any> {
                 }, {
                     and: [
                         {
-                            status: {
-                                equals: 'completed'
+                            request_type: {
+                                equals: request_type
                             }
                         }
                     ]
@@ -316,5 +241,8 @@ export async function fetchAllCompletedTask(user:string): Promise<any> {
 
     return tasks;
 }
+
+
+
 
 

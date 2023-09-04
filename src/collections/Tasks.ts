@@ -1,8 +1,8 @@
-import type { CollectionAfterChangeHook, CollectionBeforeOperationHook, CollectionConfig } from 'payload/types'
-import { canAccess, isAdmin } from '../access';
-import payload from 'payload';
-import { completeTaskById, fetchAllCompletedTask, getTaskAssignedToMe, getTaskCreatedByMe, verifyTicket } from '../helper';
+import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
+import { verifyTicket } from '../helper';
 import { updateDocumentInCollection } from '../helper/model.helper';
+import Task from '../module/Task/task.controller';
+import {  taskRoutes } from './../module/Task/task.router';
 
 const AfterChangeHook: CollectionAfterChangeHook = async ({
   doc,
@@ -37,119 +37,7 @@ const Tasks: CollectionConfig = {
     delete: () => true, // canAccess('delete'),
   },
 
-  endpoints: [
-    {
-      path: "/me",
-      method: "get",
-      handler: async (req, res, next) => {
-        try {
-          const user = req.user;
-
-          if (!user) {
-            return res.status(404).json({ error: "sorry you do not have access to this resources" });
-          }
-
-          const task = (await getTaskCreatedByMe(user.id));
-
-          return res.status(200).send(task);
-        } catch (error) {
-          // Handle errors here
-          console.error("An error occurred:", error);
-          return res.status(500).json({ error: "Internal server error" });
-        }
-      }
-      ,
-    },
-    {
-      path: "/assigned",
-      method: "patch",
-      handler: async (req, res, next) => {
-        try {
-          const user = req.user;
-
-          if (!user) {
-            return res.status(404).json({ error: "sorry you do not have access to this resources" });
-          }
-
-          const task = (await getTaskAssignedToMe(user.id));
-
-          return res.status(200).send(task);
-        } catch (error) {
-          // Handle errors here
-          console.error("An error occurred:", error);
-          return res.status(500).json({ error: "Internal server error" });
-        }
-      }
-      ,
-    },
-    {
-      path: "/complete/:id",
-      method: "get",
-      handler: async (req, res, next) => {
-        try {
-          const user = req.user;
-          const task_id = req.params.id;
-
-          if (!user) {
-            return res.status(404).json({ error: "sorry you do not have access to this resources" });
-          }
-
-          const task = (await completeTaskById(task_id));
-
-          return res.status(200).send(task);
-        } catch (error) {
-          // Handle errors here
-          console.error("An error occurred:", error);
-          return res.status(500).json({ error: "Internal server error" });
-        }
-      }
-      ,
-    },
-    {
-      path: "/complete",
-      method: "get",
-      handler: async (req, res, next) => {
-        try {
-          const user = req.user;
-
-          if (!user) {
-            return res.status(404).json({ error: "sorry you do not have access to this resources" });
-          }
-
-          const task = (await fetchAllCompletedTask(user.id));
-
-          return res.status(200).send(task);
-        } catch (error) {
-          // Handle errors here
-          console.error("An error occurred:", error);
-          return res.status(500).json({ error: "Internal server error" });
-        }
-      }
-      ,
-    },
-    {
-      path: "/reject",
-      method: "get",
-      handler: async (req, res, next) => {
-        try {
-          const user = req.user;
-
-          if (!user) {
-            return res.status(404).json({ error: "sorry you do not have access to this resources" });
-          }
-
-          const task = (await fetchAllCompletedTask(user.id));
-
-          return res.status(200).send(task);
-        } catch (error) {
-          // Handle errors here
-          console.error("An error occurred:", error);
-          return res.status(500).json({ error: "Internal server error" });
-        }
-      }
-      ,
-    }
-  ],
+  endpoints: taskRoutes,
 
   fields: [
     {
@@ -157,12 +45,14 @@ const Tasks: CollectionConfig = {
       required: true,
       type: 'text'
     },
+
     {
       name: 'assign_to',
       type: 'relationship', // Assuming users are related to the collection
       relationTo: 'users',
       required: false
     },
+
     {
       name: 'assign_by',
       type: 'relationship', // Assuming users are related to the collection
@@ -174,7 +64,7 @@ const Tasks: CollectionConfig = {
     { name: 'start_date', type: 'text', required: false },
     { name: 'end_date', type: 'text', required: false },
     { name: 'priority', type: 'text', required: false },
-    { name: 'status', type: 'text', required: false, defaultValue: "creation" },
+    { name: 'status', type: 'text', required: false, defaultValue: "PENDING" },
     {
       name: 'ticket_id',
       type: 'relationship',

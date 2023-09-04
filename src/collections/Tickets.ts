@@ -44,19 +44,17 @@ const Ticket: CollectionConfig = {
 
   endpoints: [
     {
-      path: "/me/:ticket_type",
+      path: "/me",
       method: "get",
       handler: async (req, res, next) => {
         try {
           const user = req.user;
-          const ticket_type = req.params.ticket_type;
 
-          console.log(ticket_type);
           if (!user) {
-            return res.status(404).json({ error: "sorry you do not have access to this resources" });
+            return res.status(400).json({ error: "authentication request failed" });
           }
 
-          const ticket = (await getTicketCreatedByMe(user.id, ticket_type));
+          const ticket = (await getTicketCreatedByMe(user.id));
 
           return res.status(200).send(ticket);
         } catch (error) {
@@ -68,18 +66,17 @@ const Ticket: CollectionConfig = {
       ,
     },
     {
-      path: "/assigned/:ticket_type",
+      path: "/assigned",
       method: "get",
       handler: async (req, res, next) => {
         try {
           const user = req.user;
-          const ticket_type = req.params.ticket_type;
 
           if (!user) {
-            return res.status(404).json({ error: "sorry you do not have access to this resources" });
+            return res.status(400).json({ error: "authentication request failed" });
           }
 
-          const ticket = (await getTicketAssignedToMe(user.id, ticket_type));
+          const ticket = (await getTicketAssignedToMe(user.id));
 
           return res.status(200).send(ticket);
         } catch (error) {
